@@ -41,8 +41,8 @@
       z-index: 1;
     }
     #main-gif {
-      width: 550px;    /* Cambia el tamaño aquí */
-      height: 550px;   /* Cambia el tamaño aquí */
+      width: 1000px;    /* Cambia el tamaño aquí */
+      height: 1000px;   /* Cambia el tamaño aquí */
       object-fit: contain;
       position: relative;
       z-index: 1;
@@ -88,7 +88,7 @@
     });
 
     function startRandomImages() {
-  const squareSize = 400; // Tamaño del cuadrado en px
+  const squareSize = 800; // Tamaño del cuadrado en px
   intervalId = setInterval(() => {
     const img = document.createElement('img');
     img.src = images[Math.floor(Math.random() * images.length)];
