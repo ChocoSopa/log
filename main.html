@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Scan Quesitos In Your Area</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    #scan-btn {
+      padding: 30px 60px;
+      background: #1db73d;
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-size: 2rem;
+      cursor: pointer;
+      box-shadow: 0 3px 15px #1db73d80;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+    }
+    #scan-area {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      width: 100vw;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+    #main-gif {
+      width: 550px;    /* Cambia el tamaño aquí */
+      height: 550px;   /* Cambia el tamaño aquí */
+      object-fit: contain;
+      position: relative;
+      z-index: 1;
+    }
+    .random-img {
+      position: absolute;
+      pointer-events: none;
+      transition: opacity 0.5s;
+      z-index: 3;
+      max-width: 120px;
+      max-height: 120px;
+      opacity: 0.95;
+    }
+  </style>
+</head>
+<body>
+  <button id="scan-btn">Scan Quesitos In Your Area</button>
+  <div id="scan-area">
+    <img id="main-gif" src="images/Detector_GIF1.gif" alt="scanning...">
+    <!-- Las imágenes aleatorias aparecerán aquí sobre el gif -->
+  </div>
+  <script>
+    // Archivos según tu carpeta
+    const images = [
+      'images/1.png',
+      'images/2.png',
+      'images/3.png',
+      'images/4.png',
+      'images/5.png',
+      'images/6.png'
+    ];
+
+    const scanBtn = document.getElementById('scan-btn');
+    const scanArea = document.getElementById('scan-area');
+    const mainGif = document.getElementById('main-gif');
+
+    let intervalId = null;
+
+    scanBtn.addEventListener('click', () => {
+      scanBtn.style.display = 'none';
+      scanArea.style.display = 'flex';
+      startRandomImages();
+    });
+
+    function startRandomImages() {
+  const squareSize = 400; // Tamaño del cuadrado en px
+  intervalId = setInterval(() => {
+    const img = document.createElement('img');
+    img.src = images[Math.floor(Math.random() * images.length)];
+    img.className = 'random-img';
+
+    // Posición del gif principal
+    const gifRect = mainGif.getBoundingClientRect();
+    const scanAreaRect = scanArea.getBoundingClientRect();
+
+    // Coordenadas del cuadrado centrado sobre el gif
+    const squareStartX = gifRect.left - scanAreaRect.left + (mainGif.width / 2) - (squareSize / 2);
+    const squareStartY = gifRect.top - scanAreaRect.top + (mainGif.height / 2) - (squareSize / 2);
+
+    // Posición aleatoria dentro del cuadrado
+    const randX = squareStartX + Math.random() * (squareSize - 120); // 120px = tamaño máximo de .random-img
+    const randY = squareStartY + Math.random() * (squareSize - 120);
+
+    img.style.left = `${randX}px`;
+    img.style.top = `${randY}px`;
+    img.style.opacity = 1;
+
+    scanArea.appendChild(img);
+
+    setTimeout(() => {
+      img.style.opacity = 0;
+      setTimeout(() => img.remove(), 500);
+    }, 2000);
+
+  }, 4000);
+}
+
+  </script>
+</body>
+</html>
