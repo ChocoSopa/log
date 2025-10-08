@@ -4,14 +4,13 @@
   <meta charset="UTF-8">
   <title>Scan Quesitos In Your Area</title>
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      width: 100vw;
       height: 100vh;
       background: #000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
+      overflow: hidden;
     }
     #scan-btn {
       padding: 30px 60px;
@@ -26,34 +25,34 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      z-index: 2;
+      z-index: 10;
     }
     #scan-area {
       display: none;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      width: 100vw;
-      height: 100vh;
       position: absolute;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
       z-index: 1;
     }
     #main-gif {
-      width: 1000px;    /* Cambia el tamaño aquí */
-      height: 1000px;   /* Cambia el tamaño aquí */
+      width: 98vw;
+      height: 98vh;
       object-fit: contain;
-      position: relative;
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
       z-index: 1;
+      user-select: none;
+      pointer-events: none;
     }
     .random-img {
       position: absolute;
       pointer-events: none;
-      transition: opacity 0.5s;
-      z-index: 3;
-      max-width: 120px;
-      max-height: 120px;
+      z-index: 20;
+      transition:
+        opacity 0.7s,
+        width 1.3s, height 1.3s,
+        left 1.3s, top 1.3s;
       opacity: 0.95;
     }
   </style>
@@ -61,65 +60,117 @@
 <body>
   <button id="scan-btn">Scan Quesitos In Your Area</button>
   <div id="scan-area">
-    <img id="main-gif" src="images/Detector_GIF1.gif" alt="scanning...">
-    <!-- Las imágenes aleatorias aparecerán aquí sobre el gif -->
+    <img id="main-gif" src="images/Detector_GIF2.gif" alt="scanning...">
   </div>
   <script>
-    // Archivos según tu carpeta
     const images = [
-      'images/1.png',
-      'images/2.png',
-      'images/3.png',
-      'images/4.png',
-      'images/5.png',
-      'images/6.png'
+      'images/1.png', 'images/2.png', 'images/3.png',
+      'images/4.png', 'images/5.png', 'images/6.png'
     ];
-
     const scanBtn = document.getElementById('scan-btn');
     const scanArea = document.getElementById('scan-area');
     const mainGif = document.getElementById('main-gif');
+    let regularInterval = null, specialInterval = null, runningSpecial = false;
 
-    let intervalId = null;
+    // Da posición aleatoria dentro del gif (con margen)
+    function getInGifPosition(size = 60) {
+      const gifRect = mainGif.getBoundingClientRect();
+      const margin = Math.max(gifRect.width, gifRect.height) * 0.06; // 6% margen de seguridad
+      const left = gifRect.left + margin + Math.random() * (gifRect.width - size - 2 * margin);
+      const top  = gifRect.top  + margin + Math.random() * (gifRect.height - size - 2 * margin);
+      return { left, top, size };
+    }
+
+    // Pasos hacia el centro, cada vez más grande/progresivo
+    function getProgressivePosition(step = 1, maxSize = 0.8) {
+      const gifRect = mainGif.getBoundingClientRect();
+      // Tamaño máximo (80% del más pequeño entre width/height del gif)
+      const base = Math.min(gifRect.width, gifRect.height);
+      const maxFinalSize = base * maxSize;
+      const sizeSteps = [
+        base * 0.20,
+        base * 0.34,
+        base * 0.5,
+        maxFinalSize,
+      ];
+      // Desplazamiento cada vez menor del centro
+      const offsetSteps = [
+        base * 0.30,
+        base * 0.15,
+        base * 0.06,
+        0
+      ];
+      const idx = Math.min(step, sizeSteps.length - 1);
+      const size = sizeSteps[idx];
+      const offset = offsetSteps[idx];
+      const centerX = gifRect.left + gifRect.width/2 - size/2 + (Math.random()-0.5)*offset;
+      const centerY = gifRect.top + gifRect.height/2 - size/2 + (Math.random()-0.5)*offset;
+      return { left: centerX, top: centerY, size };
+    }
 
     scanBtn.addEventListener('click', () => {
       scanBtn.style.display = 'none';
-      scanArea.style.display = 'flex';
-      startRandomImages();
+      scanArea.style.display = 'block';
+      launchQuesitos();
     });
 
-    function startRandomImages() {
-  const squareSize = 800; // Tamaño del cuadrado en px
-  intervalId = setInterval(() => {
-    const img = document.createElement('img');
-    img.src = images[Math.floor(Math.random() * images.length)];
-    img.className = 'random-img';
+    function launchQuesitos() {
+      // Aparición regular dentro del gif
+      regularInterval = setInterval(() => {
+        if (runningSpecial) return;
+        const img = document.createElement('img');
+        img.src = images[Math.floor(Math.random()*images.length)];
+        img.className = 'random-img';
+        const pos = getInGifPosition(60);
+        img.style.width = img.style.height = pos.size + "px";
+        img.style.left = pos.left + "px";
+        img.style.top = pos.top + "px";
+        img.style.opacity = 1;
+        scanArea.appendChild(img);
+        setTimeout(() => {
+          img.style.opacity = 0;
+          setTimeout(() => img.remove(), 600);
+        }, 2000);
+      }, 3000);
 
-    // Posición del gif principal
-    const gifRect = mainGif.getBoundingClientRect();
-    const scanAreaRect = scanArea.getBoundingClientRect();
+      // Animación especial
+      specialInterval = setInterval(() => {
+        runningSpecial = true;
+        const img = document.createElement('img');
+        img.src = images[Math.floor(Math.random()*images.length)];
+        img.className = 'random-img';
+        let pos = getInGifPosition(70);
+        img.style.width = img.style.height = pos.size + "px";
+        img.style.left = pos.left + "px";
+        img.style.top = pos.top + "px";
+        img.style.opacity = 1;
+        scanArea.appendChild(img);
 
-    // Coordenadas del cuadrado centrado sobre el gif
-    const squareStartX = gifRect.left - scanAreaRect.left + (mainGif.width / 2) - (squareSize / 2);
-    const squareStartY = gifRect.top - scanAreaRect.top + (mainGif.height / 2) - (squareSize / 2);
-
-    // Posición aleatoria dentro del cuadrado
-    const randX = squareStartX + Math.random() * (squareSize - 120); // 120px = tamaño máximo de .random-img
-    const randY = squareStartY + Math.random() * (squareSize - 120);
-
-    img.style.left = `${randX}px`;
-    img.style.top = `${randY}px`;
-    img.style.opacity = 1;
-
-    scanArea.appendChild(img);
-
-    setTimeout(() => {
-      img.style.opacity = 0;
-      setTimeout(() => img.remove(), 500);
-    }, 2000);
-
-  }, 4000);
-}
-
+        // Pasos progresivos más lentos y “final” más pequeño
+        let step = 0;
+        function animate() {
+          if (step < 3) {
+            const p = getProgressivePosition(step, 0.8);
+            img.style.width = img.style.height = p.size + "px";
+            img.style.left = p.left + "px";
+            img.style.top = p.top + "px";
+            step++;
+            setTimeout(animate, 2100); // más lento
+          } else {
+            // Central, tamaño máximo, 5 s
+            const p = getProgressivePosition(3, 0.8);
+            img.style.width = img.style.height = p.size + "px";
+            img.style.left = p.left + "px";
+            img.style.top = p.top + "px";
+            setTimeout(() => {
+              img.style.opacity = 0;
+              setTimeout(() => { img.remove(); runningSpecial = false; }, 700);
+            }, 5000);
+          }
+        }
+        setTimeout(animate, 1500);
+      }, 9000);
+    }
   </script>
 </body>
 </html>
