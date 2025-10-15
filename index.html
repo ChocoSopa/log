@@ -18,6 +18,7 @@
     justify-content: center;
     overflow: hidden;
     padding: 10px;
+    position: relative;
   }
 
   /* Botones grandes, adaptativos */
@@ -35,13 +36,12 @@
     max-width: 320px;
     margin-bottom: 15px;
     transition: background 0.3s, box-shadow 0.3s;
+    z-index: 10;
   }
 
   #startBtn {
     background: linear-gradient(45deg, #00ffcc, #0066ff);
     animation: pulse 2s infinite;
-    position: relative;
-    z-index: 10;
   }
   @keyframes pulse {
     0%, 100% { box-shadow: 0 0 15px #00ffcc; transform: scale(1); }
@@ -51,7 +51,6 @@
   #resetBtn {
     background: red;
     box-shadow: 0 0 15px #ff3333;
-    z-index: 10;
     display: none;
   }
 
@@ -159,6 +158,26 @@
     to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
   }
 
+  /* Botón sonido pequeño arriba derecha */
+  #soundToggle {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    background: rgba(0,255,102,0.8);
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 0 10px #00ff66;
+    cursor: pointer;
+    z-index: 1001;
+    display: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.73 2.5-2.25 2.5-4.03z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 60%;
+  }
+
   /* Estilos para pantallas grandes */
   @media (min-width: 500px) {
     #startBtn, #resetBtn {
@@ -184,6 +203,13 @@
       height: 150px;
       top: 30%;
     }
+    #soundToggle {
+      width: 50px;
+      height: 50px;
+      background-size: 70%;
+      top: 20px;
+      right: 20px;
+    }
   }
 </style>
 </head>
@@ -194,6 +220,7 @@
 </div>
 <button id="resetBtn">¡ALERTA!</button>
 <div id="bigQuesito"></div>
+<button id="soundToggle" title="Toggle scanning sound"></button>
 
 <!-- Audios -->
 <audio id="scanSound" src="images/Audio_Scaner.MP3" loop></audio>
@@ -209,9 +236,11 @@ const scanSound = document.getElementById('scanSound');
 const beep = document.getElementById('detectorBeep');
 const alertSound = document.getElementById('alertSound');
 const needle = document.getElementById('needle');
+const soundToggle = document.getElementById('soundToggle');
 
 let active = false;
 let quesitoTimer;
+let scanSoundPlaying = false;
 const totalQuesos = 6;
 const imgs = Array.from({ length: totalQuesos }, (_, i) => `images/${i + 1}.png`);
 
@@ -247,12 +276,29 @@ function startScanning() {
   startBtn.style.display = 'none';
   radar.style.display = 'block';
   resetBtn.style.display = 'block';
-  scanSound.play().catch(() => {/*oops*/});
+  soundToggle.style.display = 'block';
+  playScanSound();
   active = true;
 
   quesitoTimer = setInterval(spawnQuesito, 3000);
 
   animateNeedle();
+}
+
+function playScanSound() {
+  if (!scanSoundPlaying) {
+    scanSound.play().catch(() => {});
+    scanSoundPlaying = true;
+    soundToggle.style.backgroundColor = "rgba(0,255,102,0.8)";
+  }
+}
+
+function pauseScanSound() {
+  if (scanSoundPlaying) {
+    scanSound.pause();
+    scanSoundPlaying = false;
+    soundToggle.style.backgroundColor = "rgba(100,100,100,0.5)";
+  }
 }
 
 let startTime;
@@ -274,7 +320,7 @@ let alertPlaying = false;
 function resetRadar() {
   if (!alertPlaying) {
     clearInterval(quesitoTimer);
-    scanSound.pause();
+    pauseScanSound();
     alertSound.play();
     alertPlaying = true;
 
@@ -290,13 +336,22 @@ function resetRadar() {
 
     bigQuesito.style.display = 'none';
     radar.style.display = 'block';
-    scanSound.play().catch(() => {/*oops*/});
+    playScanSound();
     active = true;
 
     quesitoTimer = setInterval(spawnQuesito, 3000);
     requestAnimationFrame(animateNeedle);
   }
 }
+
+// Toggle scan sound on sound button click
+soundToggle.addEventListener('click', () => {
+  if (scanSoundPlaying) {
+    pauseScanSound();
+  } else if (active && !alertPlaying) {
+    playScanSound();
+  }
+});
 
 startBtn.addEventListener('click', startScanning);
 resetBtn.addEventListener('click', resetRadar);
