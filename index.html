@@ -123,9 +123,9 @@
   .quesito {
     position: absolute;
     width: 10vw;
-    max-width: 40px;
+    max-width: 80px;
     height: 10vw;
-    max-height: 40px;
+    max-height: 80px;
     background-size: contain;
     background-repeat: no-repeat;
     opacity: 0;
@@ -175,8 +175,8 @@
       top: 3%;
     }
     .quesito {
-      width: 40px;
-      height: 40px;
+      width: 100px;
+      height: 100px;
     }
     #bigQuesito {
       width: 150px;
@@ -195,8 +195,8 @@
 <div id="bigQuesito"></div>
 
 <!-- Audios -->
-<audio id="scanSound" src="https://cdn.pixabay.com/audio/2022/06/14/audio_123b6fa6e1.mp3" loop></audio>
-<audio id="detectorBeep" src="https://cdn.pixabay.com/audio/2022/03/15/audio_f499d8508d.mp3"></audio>
+<audio id="scanSound" src="images/Audio_Scaner.MP3" loop></audio>
+<audio id="detectorBeep" src="https://cdn.pixabay.com/audio/2022/03/15/audio_f499d8508.mp3"></audio>
 <audio id="alertSound" src="images/MA_Originals_Various Alarms_Chaos Texture Alert.wav"></audio>
 
 <script>
@@ -204,7 +204,7 @@ const startBtn = document.getElementById('startBtn');
 const radar = document.getElementById('radar');
 const resetBtn = document.getElementById('resetBtn');
 const bigQuesito = document.getElementById('bigQuesito');
-const scanSound = document.getElementById('scanSound');
+const scanSound = document.getElementById('scanSound'); // Audio Scaner.MP3 loop
 const beep = document.getElementById('detectorBeep');
 const alertSound = document.getElementById('alertSound');
 const needle = document.getElementById('needle');
@@ -214,6 +214,7 @@ let quesitoTimer;
 const totalQuesos = 6;
 const imgs = Array.from({ length: totalQuesos }, (_, i) => `images/${i + 1}.png`);
 
+// Position random inside radius, centered
 function randomPos(radius) {
   const angle = Math.random() * Math.PI * 2;
   const r = Math.random() * (radius - 40);
@@ -233,22 +234,23 @@ function spawnQuesito() {
   q.style.backgroundImage = `url(${img})`;
   radar.appendChild(q);
   setTimeout(() => {
-    if (q.parentNode) q.remove();
-  }, 3000);
-  setTimeout(() => {
     q.style.opacity = 1;
     beep.play();
   }, 200);
+  setTimeout(() => {
+    if (q.parentNode) q.remove();
+  }, 3000);
 }
 
 function startScanning() {
+  if (active) return;
   startBtn.style.display = 'none';
   radar.style.display = 'block';
   resetBtn.style.display = 'block';
-  scanSound.play();
+  scanSound.play(); // Reproduce audio de scanner al empezar
   active = true;
 
-  quesitoTimer = setInterval(spawnQuesito, 1750);
+  quesitoTimer = setInterval(spawnQuesito, 3000);
 
   animateNeedle();
 }
@@ -259,34 +261,42 @@ function animateNeedle(timestamp) {
   const elapsed = timestamp - startTime;
   const rotation = (elapsed / 3000) * 360;
   needle.style.transform = `rotate(${rotation}deg) translate(-50%, 0)`;
-  requestAnimationFrame(animateNeedle);
+  if(active) {
+    requestAnimationFrame(animateNeedle);
+  } else {
+    needle.style.transform = `translate(-50%, 0)`;
+    startTime = null;
+  }
 }
 
 let alertPlaying = false;
 
 function resetRadar() {
   if (!alertPlaying) {
+    // Mostrar alerta: detener escaneo y sonido de escaneo, sonar alarma y mostrar queso grande
+    clearInterval(quesitoTimer);
+    scanSound.pause();
     alertSound.play();
     alertPlaying = true;
 
-    clearInterval(quesitoTimer);
     const imgIndex = Math.floor(Math.random() * totalQuesos);
     bigQuesito.style.backgroundImage = `url(${imgs[imgIndex]})`;
     bigQuesito.style.display = 'block';
     bigQuesito.style.animation = 'grow 2s forwards';
-    scanSound.pause();
     active = false;
   } else {
+    // Reanudar escaneo y sonido
     alertSound.pause();
     alertSound.currentTime = 0;
     alertPlaying = false;
 
     bigQuesito.style.display = 'none';
     radar.style.display = 'block';
+    scanSound.play();
     active = true;
 
-    quesitoTimer = setInterval(spawnQuesito, 1750);
-    scanSound.play();
+    quesitoTimer = setInterval(spawnQuesito, 3000);
+    requestAnimationFrame(animateNeedle);
   }
 }
 
