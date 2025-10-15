@@ -247,7 +247,11 @@ function startScanning() {
   startBtn.style.display = 'none';
   radar.style.display = 'block';
   resetBtn.style.display = 'block';
-  scanSound.play();
+  // Reproducir audio solo al hacer clic en botón
+  scanSound.play().catch(e => {
+    // En caso de bloqueo, se puede manejar o dejar en blanco
+    console.log("Audio play prevented until user interaction");
+  });
   active = true;
 
   quesitoTimer = setInterval(spawnQuesito, 3000);
@@ -290,7 +294,9 @@ function resetRadar() {
 
     bigQuesito.style.display = 'none';
     radar.style.display = 'block';
-    scanSound.play();
+    scanSound.play().catch(e => {
+      console.log("Audio play prevented until user interaction");
+    });
     active = true;
 
     quesitoTimer = setInterval(spawnQuesito, 3000);
