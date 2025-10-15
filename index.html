@@ -20,18 +20,19 @@
     padding: 10px;
   }
 
-  /* Botón grande, ancho adaptado */
+  /* Botones grandes, adaptativos */
   #startBtn, #resetBtn {
-    padding: 18px 40px;
-    font-size: 1.8rem;
+    padding: 16px 32px;
+    font-size: 5vw;
+    max-font-size: 28px;
     border: none;
     border-radius: 25px;
     cursor: pointer;
     color: white;
     box-shadow: 0 0 15px #00ffcc;
     user-select: none;
-    max-width: 90vw;
-    width: 300px;
+    width: 90vw;
+    max-width: 320px;
     margin-bottom: 15px;
     transition: background 0.3s, box-shadow 0.3s;
   }
@@ -54,7 +55,7 @@
     display: none;
   }
 
-  /* Radar centrado, circular con tamaño adaptado a móvil */
+  /* Radar circular, responsive */
   #radar {
     width: 90vw;
     max-width: 400px;
@@ -74,8 +75,8 @@
   #needle {
     position: absolute;
     left: 50%;
-    top: 0%; /* ligeramente más abajo para ajuste visual */
-    width: 1.2vw;
+    top: 0%;
+    width: 1.5vw;
     max-width: 6px;
     height: 45vw;
     max-height: 190px;
@@ -95,9 +96,9 @@
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 4.5vw;
+    width: 5vw;
     max-width: 15px;
-    height: 1.2vw;
+    height: 1.5vw;
     max-height: 4px;
     background: #00ff66;
     filter: blur(6px);
@@ -119,7 +120,7 @@
     opacity: 0.3;
   }
 
-  /* Quesitos más grandes y proporcionados */
+  /* Quesitos tamaño adaptativo */
   .quesito {
     position: absolute;
     width: 10vw;
@@ -134,7 +135,7 @@
     cursor: default;
   }
 
-  /* Quesito grande (alerta) tamaño adaptado */
+  /* Quesito grande (alerta) tamaño adaptativo */
   #bigQuesito {
     display: none;
     position: fixed;
@@ -158,7 +159,7 @@
     to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
   }
 
-  /* Para pantallas grandes usar tamaños fijos */
+  /* Estilos para pantallas grandes */
   @media (min-width: 500px) {
     #startBtn, #resetBtn {
       width: 300px;
@@ -175,8 +176,8 @@
       top: 3%;
     }
     .quesito {
-      width: 100px;
-      height: 100px;
+      width: 80px;
+      height: 80px;
     }
     #bigQuesito {
       width: 150px;
@@ -189,7 +190,7 @@
 <body>
 <button id="startBtn">Scan Quesitos in your area</button>
 <div id="radar">
-  <div id="needle"></div>
+  <div id="needle"></div>
 </div>
 <button id="resetBtn">¡ALERTA!</button>
 <div id="bigQuesito"></div>
@@ -204,7 +205,7 @@ const startBtn = document.getElementById('startBtn');
 const radar = document.getElementById('radar');
 const resetBtn = document.getElementById('resetBtn');
 const bigQuesito = document.getElementById('bigQuesito');
-const scanSound = document.getElementById('scanSound'); // Audio Scaner.MP3 loop
+const scanSound = document.getElementById('scanSound');
 const beep = document.getElementById('detectorBeep');
 const alertSound = document.getElementById('alertSound');
 const needle = document.getElementById('needle');
@@ -214,90 +215,87 @@ let quesitoTimer;
 const totalQuesos = 6;
 const imgs = Array.from({ length: totalQuesos }, (_, i) => `images/${i + 1}.png`);
 
-// Position random inside radius, centered
 function randomPos(radius) {
-  const angle = Math.random() * Math.PI * 2;
-  const r = Math.random() * (radius - 40);
-  return {
-    x: Math.cos(angle) * r + radius,
-    y: Math.sin(angle) * r + radius
-  };
+  const angle = Math.random() * Math.PI * 2;
+  const r = Math.random() * (radius - 40);
+  return {
+    x: Math.cos(angle) * r + radius,
+    y: Math.sin(angle) * r + radius
+  };
 }
 
 function spawnQuesito() {
-  const pos = randomPos(200);
-  const img = imgs[Math.floor(Math.random() * totalQuesos)];
-  const q = document.createElement('div');
-  q.className = 'quesito';
-  q.style.left = `${pos.x - 20}px`;
-  q.style.top = `${pos.y - 20}px`;
-  q.style.backgroundImage = `url(${img})`;
-  radar.appendChild(q);
-  setTimeout(() => {
-    q.style.opacity = 1;
-    beep.play();
-  }, 200);
-  setTimeout(() => {
-    if (q.parentNode) q.remove();
-  }, 3000);
+  const pos = randomPos(200);
+  const img = imgs[Math.floor(Math.random() * totalQuesos)];
+  const q = document.createElement('div');
+  q.className = 'quesito';
+  q.style.left = `${pos.x - 20}px`;
+  q.style.top = `${pos.y - 20}px`;
+  q.style.backgroundImage = `url(${img})`;
+  radar.appendChild(q);
+  setTimeout(() => {
+    q.style.opacity = 1;
+    beep.play();
+  }, 200);
+  setTimeout(() => {
+    if (q.parentNode) q.remove();
+  }, 3000);
 }
 
 function startScanning() {
-  if (active) return;
-  startBtn.style.display = 'none';
-  radar.style.display = 'block';
-  resetBtn.style.display = 'block';
-  scanSound.play(); // Reproduce audio de scanner al empezar
-  active = true;
+  if (active) return;
+  startBtn.style.display = 'none';
+  radar.style.display = 'block';
+  resetBtn.style.display = 'block';
+  scanSound.play();
+  active = true;
 
-  quesitoTimer = setInterval(spawnQuesito, 3000);
+  quesitoTimer = setInterval(spawnQuesito, 3000);
 
-  animateNeedle();
+  animateNeedle();
 }
 
 let startTime;
 function animateNeedle(timestamp) {
-  if (!startTime) startTime = timestamp;
-  const elapsed = timestamp - startTime;
-  const rotation = (elapsed / 3000) * 360;
-  needle.style.transform = `rotate(${rotation}deg) translate(-50%, 0)`;
-  if(active) {
-    requestAnimationFrame(animateNeedle);
-  } else {
-    needle.style.transform = `translate(-50%, 0)`;
-    startTime = null;
-  }
+  if (!startTime) startTime = timestamp;
+  const elapsed = timestamp - startTime;
+  const rotation = (elapsed / 3000) * 360;
+  needle.style.transform = `rotate(${rotation}deg) translate(-50%, 0)`;
+  if(active) {
+    requestAnimationFrame(animateNeedle);
+  } else {
+    needle.style.transform = `translate(-50%, 0)`;
+    startTime = null;
+  }
 }
 
 let alertPlaying = false;
 
 function resetRadar() {
-  if (!alertPlaying) {
-    // Mostrar alerta: detener escaneo y sonido de escaneo, sonar alarma y mostrar queso grande
-    clearInterval(quesitoTimer);
-    scanSound.pause();
-    alertSound.play();
-    alertPlaying = true;
+  if (!alertPlaying) {
+    clearInterval(quesitoTimer);
+    scanSound.pause();
+    alertSound.play();
+    alertPlaying = true;
 
-    const imgIndex = Math.floor(Math.random() * totalQuesos);
-    bigQuesito.style.backgroundImage = `url(${imgs[imgIndex]})`;
-    bigQuesito.style.display = 'block';
-    bigQuesito.style.animation = 'grow 2s forwards';
-    active = false;
-  } else {
-    // Reanudar escaneo y sonido
-    alertSound.pause();
-    alertSound.currentTime = 0;
-    alertPlaying = false;
+    const imgIndex = Math.floor(Math.random() * totalQuesos);
+    bigQuesito.style.backgroundImage = `url(${imgs[imgIndex]})`;
+    bigQuesito.style.display = 'block';
+    bigQuesito.style.animation = 'grow 2s forwards';
+    active = false;
+  } else {
+    alertSound.pause();
+    alertSound.currentTime = 0;
+    alertPlaying = false;
 
-    bigQuesito.style.display = 'none';
-    radar.style.display = 'block';
-    scanSound.play();
-    active = true;
+    bigQuesito.style.display = 'none';
+    radar.style.display = 'block';
+    scanSound.play();
+    active = true;
 
-    quesitoTimer = setInterval(spawnQuesito, 3000);
-    requestAnimationFrame(animateNeedle);
-  }
+    quesitoTimer = setInterval(spawnQuesito, 3000);
+    requestAnimationFrame(animateNeedle);
+  }
 }
 
 startBtn.addEventListener('click', startScanning);
