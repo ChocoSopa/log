@@ -2,56 +2,83 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <title>Quesito Radar Detector Mejorado</title>
 <style>
+  /* Reset body */
   body {
     margin: 0;
     height: 100vh;
     background: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
     color: white;
     font-family: 'Trebuchet MS', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 10px;
   }
 
-  #startBtn {
-    padding: 20px 60px;
-    background: linear-gradient(45deg, #00ffcc, #0066ff);
-    font-size: 26px;
+  /* Botón grande, ancho adaptado */
+  #startBtn, #resetBtn {
+    padding: 18px 40px;
+    font-size: 1.8rem;
     border: none;
-    border-radius: 20px;
+    border-radius: 25px;
     cursor: pointer;
     color: white;
     box-shadow: 0 0 15px #00ffcc;
+    user-select: none;
+    max-width: 90vw;
+    width: 300px;
+    margin-bottom: 15px;
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+
+  #startBtn {
+    background: linear-gradient(45deg, #00ffcc, #0066ff);
     animation: pulse 2s infinite;
-    z-index: 10;
     position: relative;
+    z-index: 10;
   }
   @keyframes pulse {
     0%, 100% { box-shadow: 0 0 15px #00ffcc; transform: scale(1); }
     50% { box-shadow: 0 0 35px #00ccff; transform: scale(1.1); }
   }
 
-  #radar {
+  #resetBtn {
+    background: red;
+    box-shadow: 0 0 15px #ff3333;
+    z-index: 10;
     display: none;
-    position: relative;
-    width: 400px;
-    height: 400px;
+  }
+
+  /* Radar centrado, circular con tamaño adaptado a móvil */
+  #radar {
+    width: 90vw;
+    max-width: 400px;
+    height: 90vw;
+    max-height: 400px;
     border-radius: 50%;
     border: 3px solid #00ff66;
     background: radial-gradient(circle at center, rgba(0,255,100,0.2), rgba(0,0,0,0.9));
     overflow: hidden;
     box-shadow: 0 0 20px #00ff99;
+    position: relative;
+    margin-bottom: 20px;
+    display: none;
   }
 
+  /* Aguja centrada y proporcional */
   #needle {
     position: absolute;
     left: 50%;
-    top: 3%;
-    width: 4px;
-    height: 190px;
+    top: 4%; /* ligeramente más abajo para ajuste visual */
+    width: 1.2vw;
+    max-width: 6px;
+    height: 45vw;
+    max-height: 190px;
     background: linear-gradient(180deg, #00ff66, transparent);
     transform-origin: bottom center;
     box-shadow:
@@ -68,8 +95,10 @@
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 15px;
-    height: 4px;
+    width: 4.5vw;
+    max-width: 15px;
+    height: 1.2vw;
+    max-height: 4px;
     background: #00ff66;
     filter: blur(6px);
     opacity: 0.6;
@@ -77,20 +106,26 @@
   #needle::after {
     content: '';
     position: absolute;
-    bottom: 20px;
+    bottom: 4vw;
+    max-bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    width: 30px;
-    height: 5px;
+    width: 9vw;
+    max-width: 30px;
+    height: 1.5vw;
+    max-height: 5px;
     background: #00ff99;
     filter: blur(10px);
     opacity: 0.3;
   }
 
+  /* Quesitos más grandes y proporcionados */
   .quesito {
     position: absolute;
-    width: 40px;
-    height: 40px;
+    width: 10vw;
+    max-width: 40px;
+    height: 10vw;
+    max-height: 40px;
     background-size: contain;
     background-repeat: no-repeat;
     opacity: 0;
@@ -99,30 +134,17 @@
     cursor: default;
   }
 
-  #resetBtn {
-    display: none;
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 15px 25px;
-    background: red;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 18px;
-    cursor: pointer;
-    box-shadow: 0 0 15px #ff3333;
-    z-index: 10;
-  }
-
+  /* Quesito grande (alerta) tamaño adaptado */
   #bigQuesito {
     display: none;
     position: fixed;
     left: 50%;
-    top: 40%;
+    top: 35vh;
     transform: translate(-50%, -50%) scale(0);
-    width: 150px;
-    height: 150px;
+    width: 40vw;
+    max-width: 150px;
+    height: 40vw;
+    max-height: 150px;
     background-size: contain;
     background-repeat: no-repeat;
     animation: grow 2s forwards;
@@ -134,6 +156,33 @@
   @keyframes grow {
     from { transform: translate(-50%, -50%) scale(0); opacity: 0; }
     to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  }
+
+  /* Para pantallas grandes usar tamaños fijos */
+  @media (min-width: 500px) {
+    #startBtn, #resetBtn {
+      width: 300px;
+      font-size: 26px;
+      padding: 20px 60px;
+    }
+    #radar {
+      width: 400px;
+      height: 400px;
+    }
+    #needle {
+      width: 4px;
+      height: 190px;
+      top: 3%;
+    }
+    .quesito {
+      width: 40px;
+      height: 40px;
+    }
+    #bigQuesito {
+      width: 150px;
+      height: 150px;
+      top: 40%;
+    }
   }
 </style>
 </head>
@@ -184,9 +233,7 @@ function spawnQuesito() {
   q.style.backgroundImage = `url(${img})`;
   radar.appendChild(q);
   setTimeout(() => {
-    if (q.parentNode) {
-      q.remove();
-    }
+    if (q.parentNode) q.remove();
   }, 3000);
   setTimeout(() => {
     q.style.opacity = 1;
@@ -201,9 +248,7 @@ function startScanning() {
   scanSound.play();
   active = true;
 
-  quesitoTimer = setInterval(() => {
-    spawnQuesito();
-  }, 1750);
+  quesitoTimer = setInterval(spawnQuesito, 1750);
 
   animateNeedle();
 }
@@ -221,11 +266,9 @@ let alertPlaying = false;
 
 function resetRadar() {
   if (!alertPlaying) {
-    // Iniciar sonido alerta
     alertSound.play();
     alertPlaying = true;
 
-    // Mostrar queso grande y detener escaneo
     clearInterval(quesitoTimer);
     const imgIndex = Math.floor(Math.random() * totalQuesos);
     bigQuesito.style.backgroundImage = `url(${imgs[imgIndex]})`;
@@ -234,7 +277,6 @@ function resetRadar() {
     scanSound.pause();
     active = false;
   } else {
-    // Parar sonido alerta y reiniciar escaneo
     alertSound.pause();
     alertSound.currentTime = 0;
     alertPlaying = false;
@@ -243,10 +285,7 @@ function resetRadar() {
     radar.style.display = 'block';
     active = true;
 
-    quesitoTimer = setInterval(() => {
-      spawnQuesito();
-    }, 1750);
-
+    quesitoTimer = setInterval(spawnQuesito, 1750);
     scanSound.play();
   }
 }
