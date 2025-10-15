@@ -120,12 +120,12 @@
     opacity: 0.3;
   }
 
-  /* Quesitos tamaño adaptativo */
+  /* Quesitos tamaño doble adaptativo */
   .quesito {
     position: absolute;
-    width: 10vw;
+    width: 20vw;
     max-width: 80px;
-    height: 10vw;
+    height: 20vw;
     max-height: 80px;
     background-size: contain;
     background-repeat: no-repeat;
@@ -188,7 +188,7 @@
 </style>
 </head>
 <body>
-<button id="startBtn">Scan Quesitos in your area</button>
+<button id="startBtn">Scan Quesitos In Your Area</button>
 <div id="radar">
   <div id="needle"></div>
 </div>
@@ -247,11 +247,7 @@ function startScanning() {
   startBtn.style.display = 'none';
   radar.style.display = 'block';
   resetBtn.style.display = 'block';
-  // Reproducir audio solo al hacer clic en botón
-  scanSound.play().catch(e => {
-    // En caso de bloqueo, se puede manejar o dejar en blanco
-    console.log("Audio play prevented until user interaction");
-  });
+  scanSound.play().catch(() => {/*oops*/});
   active = true;
 
   quesitoTimer = setInterval(spawnQuesito, 3000);
@@ -294,9 +290,7 @@ function resetRadar() {
 
     bigQuesito.style.display = 'none';
     radar.style.display = 'block';
-    scanSound.play().catch(e => {
-      console.log("Audio play prevented until user interaction");
-    });
+    scanSound.play().catch(() => {/*oops*/});
     active = true;
 
     quesitoTimer = setInterval(spawnQuesito, 3000);
