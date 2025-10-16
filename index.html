@@ -21,6 +21,7 @@
     position: relative;
   }
 
+
   /* Botones grandes, adaptativos */
   #startBtn, #resetBtn {
     padding: 16px 32px;
@@ -39,6 +40,7 @@
     z-index: 10;
   }
 
+
   #startBtn {
     background: linear-gradient(45deg, #00ffcc, #0066ff);
     animation: pulse 2s infinite;
@@ -48,11 +50,13 @@
     50% { box-shadow: 0 0 35px #00ccff; transform: scale(1.1); }
   }
 
+
   #resetBtn {
     background: red;
     box-shadow: 0 0 15px #ff3333;
     display: none;
   }
+
 
   /* Radar circular, responsive */
   #radar {
@@ -69,6 +73,7 @@
     margin-bottom: 20px;
     display: none;
   }
+
 
   /* Aguja centrada y proporcional */
   #needle {
@@ -119,6 +124,7 @@
     opacity: 0.3;
   }
 
+
   /* Quesitos tamaño doble adaptativo */
   .quesito {
     position: absolute;
@@ -133,6 +139,7 @@
     pointer-events: auto;
     cursor: default;
   }
+
 
   /* Quesito grande (alerta) tamaño adaptativo */
   #bigQuesito {
@@ -153,10 +160,12 @@
     filter: drop-shadow(0 0 10px #00ff66);
   }
 
+
   @keyframes grow {
     from { transform: translate(-50%, -50%) scale(0); opacity: 0; }
     to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
   }
+
 
   /* Botón sonido pequeño arriba derecha */
   #soundToggle {
@@ -177,6 +186,7 @@
     background-position: center;
     background-size: 60%;
   }
+
 
   /* Estilos para pantallas grandes */
   @media (min-width: 500px) {
@@ -222,10 +232,20 @@
 <div id="bigQuesito"></div>
 <button id="soundToggle" title="Toggle scanning sound"></button>
 
-<!-- Audios -->
-<audio id="scanSound" src="images/scaner.WAV" loop></audio>
+
+<!-- Escaneo con formato WAV explícito -->
+<audio id="scanSound" loop preload="auto">
+  <source src="images/scaner.wav" type="audio/wav">
+  Tu navegador no puede reproducir este audio.
+</audio>
+
 <audio id="detectorBeep" src="https://cdn.pixabay.com/audio/2022/03/15/audio_f499d8508.mp3"></audio>
-<audio id="alertSound" src="images/MA_Originals_Various Alarms_Chaos Texture Alert.wav"></audio>
+
+<!-- Alerta -->
+<audio id="alertSound" preload="auto">
+  <source src="images/MA_Originals_Various Alarms_Chaos Texture Alert.wav" type="audio/wav">
+</audio>
+
 
 <script>
 const startBtn = document.getElementById('startBtn');
@@ -238,11 +258,13 @@ const alertSound = document.getElementById('alertSound');
 const needle = document.getElementById('needle');
 const soundToggle = document.getElementById('soundToggle');
 
+
 let active = false;
 let quesitoTimer;
 let scanSoundPlaying = false;
 const totalQuesos = 6;
 const imgs = Array.from({ length: totalQuesos }, (_, i) => `images/${i + 1}.png`);
+
 
 function randomPos(radius) {
   const angle = Math.random() * Math.PI * 2;
@@ -252,6 +274,7 @@ function randomPos(radius) {
     y: Math.sin(angle) * r + radius
   };
 }
+
 
 function spawnQuesito() {
   const pos = randomPos(200);
@@ -271,6 +294,7 @@ function spawnQuesito() {
   }, 3000);
 }
 
+
 function startScanning() {
   if (active) return;
   startBtn.style.display = 'none';
@@ -283,6 +307,7 @@ function startScanning() {
   animateNeedle();
 }
 
+
 function playScanSound() {
   if (!scanSoundPlaying) {
     scanSound.play().catch(() => {});
@@ -291,6 +316,7 @@ function playScanSound() {
   }
 }
 
+
 function pauseScanSound() {
   if (scanSoundPlaying) {
     scanSound.pause();
@@ -298,6 +324,7 @@ function pauseScanSound() {
     soundToggle.style.backgroundColor = "rgba(100,100,100,0.5)";
   }
 }
+
 
 let startTime;
 function animateNeedle(timestamp) {
@@ -313,7 +340,9 @@ function animateNeedle(timestamp) {
   }
 }
 
+
 let alertPlaying = false;
+
 
 function resetRadar() {
   if (!alertPlaying) {
@@ -321,6 +350,7 @@ function resetRadar() {
     pauseScanSound();
     alertSound.play();
     alertPlaying = true;
+
 
     const imgIndex = Math.floor(Math.random() * totalQuesos);
     bigQuesito.style.backgroundImage = `url(${imgs[imgIndex]})`;
@@ -332,14 +362,17 @@ function resetRadar() {
     alertSound.currentTime = 0;
     alertPlaying = false;
 
+
     bigQuesito.style.display = 'none';
     radar.style.display = 'block';
     active = true;
+
 
     quesitoTimer = setInterval(spawnQuesito, 3000);
     requestAnimationFrame(animateNeedle);
   }
 }
+
 
 // Toggle scan sound on sound button click
 soundToggle.addEventListener('click', () => {
@@ -349,6 +382,7 @@ soundToggle.addEventListener('click', () => {
     playScanSound();
   }
 });
+
 
 startBtn.addEventListener('click', startScanning);
 resetBtn.addEventListener('click', resetRadar);
