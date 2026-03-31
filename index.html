@@ -1,391 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>Quesito Radar Detector Mejorado</title>
-<style>
-  /* Reset body */
-  body {
-    margin: 0;
-    height: 100vh;
-    background: black;
-    color: white;
-    font-family: 'Trebuchet MS', sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    padding: 10px;
-    position: relative;
-  }
-
-
-  /* Botones grandes, adaptativos */
-  #startBtn, #resetBtn {
-    padding: 16px 32px;
-    font-size: 5vw;
-    max-font-size: 28px;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    color: white;
-    box-shadow: 0 0 15px #00ffcc;
-    user-select: none;
-    width: 90vw;
-    max-width: 320px;
-    margin-bottom: 15px;
-    transition: background 0.3s, box-shadow 0.3s;
-    z-index: 10;
-  }
-
-
-  #startBtn {
-    background: linear-gradient(45deg, #00ffcc, #0066ff);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 15px #00ffcc; transform: scale(1); }
-    50% { box-shadow: 0 0 35px #00ccff; transform: scale(1.1); }
-  }
-
-
-  #resetBtn {
-    background: red;
-    box-shadow: 0 0 15px #ff3333;
-    display: none;
-  }
-
-
-  /* Radar circular, responsive */
-  #radar {
-    width: 90vw;
-    max-width: 400px;
-    height: 90vw;
-    max-height: 400px;
-    border-radius: 50%;
-    border: 3px solid #00ff66;
-    background: radial-gradient(circle at center, rgba(0,255,100,0.2), rgba(0,0,0,0.9));
-    overflow: hidden;
-    box-shadow: 0 0 20px #00ff99;
-    position: relative;
-    margin-bottom: 20px;
-    display: none;
-  }
-
-
-  /* Aguja centrada y proporcional */
-  #needle {
-    position: absolute;
-    left: 50%;
-    top: 0%;
-    width: 1.5vw;
-    max-width: 6px;
-    height: 45vw;
-    max-height: 190px;
-    background: linear-gradient(180deg, #00ff66, transparent);
-    transform-origin: bottom center;
-    box-shadow:
-      0 0 10px #00ff66,
-      0 0 20px #00ff66,
-      0 0 30px #00ff99;
-    pointer-events: none;
-    z-index: 5;
-    transform: translate(-50%, 0);
-  }
-  #needle::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 5vw;
-    max-width: 15px;
-    height: 1.5vw;
-    max-height: 4px;
-    background: #00ff66;
-    filter: blur(6px);
-    opacity: 0.6;
-  }
-  #needle::after {
-    content: '';
-    position: absolute;
-    bottom: 4vw;
-    max-bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 9vw;
-    max-width: 30px;
-    height: 1.5vw;
-    max-height: 5px;
-    background: #00ff99;
-    filter: blur(10px);
-    opacity: 0.3;
-  }
-
-
-  /* Quesitos tamaño doble adaptativo */
-  .quesito {
-    position: absolute;
-    width: 20vw;
-    max-width: 80px;
-    height: 20vw;
-    max-height: 80px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    opacity: 0;
-    transition: all 0.8s ease-out;
-    pointer-events: auto;
-    cursor: default;
-  }
-
-
-  /* Quesito grande (alerta) tamaño adaptativo */
-  #bigQuesito {
-    display: none;
-    position: fixed;
-    left: 50%;
-    top: 35vh;
-    transform: translate(-50%, -50%) scale(0);
-    width: 40vw;
-    max-width: 150px;
-    height: 40vw;
-    max-height: 150px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    animation: grow 2s forwards;
-    pointer-events: none;
-    z-index: 20;
-    filter: drop-shadow(0 0 10px #00ff66);
-  }
-
-
-  @keyframes grow {
-    from { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-  }
-
-
-  /* Botón sonido pequeño arriba derecha */
-  #soundToggle {
-    position: fixed;
-    top: 15px;
-    right: 15px;
-    width: 40px;
-    height: 40px;
-    background: rgba(100,100,100,0.5);
-    border-radius: 50%;
-    border: none;
-    box-shadow: 0 0 10px #00ff66;
-    cursor: pointer;
-    z-index: 1001;
-    display: none;
-    background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.73 2.5-2.25 2.5-4.03z"/></svg>');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 60%;
-  }
-
-
-  /* Estilos para pantallas grandes */
-  @media (min-width: 500px) {
-    #startBtn, #resetBtn {
-      width: 300px;
-      font-size: 26px;
-      padding: 20px 60px;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulación de acceso</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #f3f6fb, #dfe9f3);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
-    #radar {
-      width: 400px;
-      height: 400px;
+
+    .login-box {
+      background: white;
+      width: 340px;
+      padding: 28px;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
     }
-    #needle {
-      width: 4px;
-      height: 190px;
-      top: 3%;
+
+    h2 {
+      margin: 0 0 10px;
+      text-align: center;
     }
-    .quesito {
-      width: 80px;
-      height: 80px;
+
+    .warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 16px;
     }
-    #bigQuesito {
-      width: 150px;
-      height: 150px;
-      top: 30%;
+
+    label {
+      display: block;
+      margin-top: 12px;
+      margin-bottom: 6px;
+      font-weight: bold;
     }
-    #soundToggle {
-      width: 50px;
-      height: 50px;
-      background-size: 70%;
-      top: 20px;
-      right: 20px;
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #c8c8c8;
+      border-radius: 8px;
+      box-sizing: border-box;
     }
-  }
-</style>
+
+    button {
+      width: 100%;
+      margin-top: 18px;
+      padding: 11px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+      margin-top: 12px;
+    }
+  </style>
 </head>
 <body>
-<button id="startBtn">Scan Quesitos In Your Area</button>
-<div id="radar">
-  <div id="needle"></div>
-</div>
-<button id="resetBtn">¡ALERTA!</button>
-<div id="bigQuesito"></div>
-<button id="soundToggle" title="Toggle scanning sound"></button>
+  <div class="login-box">
+    <h2>Acceso al correo</h2>
+    <div class="warning">
+      Simulación educativa: esta página no envía ni almacena credenciales.
+    </div>
 
+    <form id="demoForm">
+      <label for="email">Correo</label>
+      <input type="email" id="email" placeholder="usuario@ejemplo.com" required>
 
-<!-- Escaneo con formato WAV explícito -->
-<audio id="scanSound" loop preload="auto">
-  <source src="images/sensor.wav" type="audio/wav">
-  Tu navegador no puede reproducir este audio.
-</audio>
+      <label for="password">Contraseña</label>
+      <input type="password" id="password" placeholder="••••••••" required>
 
-<audio id="detectorBeep" src="https://cdn.pixabay.com/audio/2022/03/15/audio_f499d8508.mp3"></audio>
+      <button type="submit">Entrar</button>
+    </form>
 
-<!-- Alerta -->
-<audio id="alertSound" preload="auto">
-  <source src="images/MA_Originals_Various Alarms_Chaos Texture Alert.wav" type="audio/wav">
-</audio>
+    <div class="footer">Demo de concienciación de seguridad</div>
+  </div>
 
+  <script>
+    document.getElementById("demoForm").addEventListener("submit", function(e) {
+      e.preventDefault();
 
-<script>
-const startBtn = document.getElementById('startBtn');
-const radar = document.getElementById('radar');
-const resetBtn = document.getElementById('resetBtn');
-const bigQuesito = document.getElementById('bigQuesito');
-const scanSound = document.getElementById('scanSound');
-const beep = document.getElementById('detectorBeep');
-const alertSound = document.getElementById('alertSound');
-const needle = document.getElementById('needle');
-const soundToggle = document.getElementById('soundToggle');
-
-
-let active = false;
-let quesitoTimer;
-let scanSoundPlaying = false;
-const totalQuesos = 6;
-const imgs = Array.from({ length: totalQuesos }, (_, i) => `images/${i + 1}.png`);
-
-
-function randomPos(radius) {
-  const angle = Math.random() * Math.PI * 2;
-  const r = Math.random() * (radius - 40);
-  return {
-    x: Math.cos(angle) * r + radius,
-    y: Math.sin(angle) * r + radius
-  };
-}
-
-
-function spawnQuesito() {
-  const pos = randomPos(200);
-  const img = imgs[Math.floor(Math.random() * totalQuesos)];
-  const q = document.createElement('div');
-  q.className = 'quesito';
-  q.style.left = `${pos.x - 20}px`;
-  q.style.top = `${pos.y - 20}px`;
-  q.style.backgroundImage = `url(${img})`;
-  radar.appendChild(q);
-  setTimeout(() => {
-    q.style.opacity = 1;
-    beep.play();
-  }, 200);
-  setTimeout(() => {
-    if (q.parentNode) q.remove();
-  }, 3000);
-}
-
-
-function startScanning() {
-  if (active) return;
-  startBtn.style.display = 'none';
-  radar.style.display = 'block';
-  resetBtn.style.display = 'block';
-  soundToggle.style.display = 'block';
-  // El sonido de escaneo no se inicia automáticamente aquí - espera toggle manual
-  active = true;
-  quesitoTimer = setInterval(spawnQuesito, 3000);
-  animateNeedle();
-}
-
-
-function playScanSound() {
-  if (!scanSoundPlaying) {
-    scanSound.play().catch(() => {});
-    scanSoundPlaying = true;
-    soundToggle.style.backgroundColor = "rgba(0,255,102,0.8)";
-  }
-}
-
-
-function pauseScanSound() {
-  if (scanSoundPlaying) {
-    scanSound.pause();
-    scanSoundPlaying = false;
-    soundToggle.style.backgroundColor = "rgba(100,100,100,0.5)";
-  }
-}
-
-
-let startTime;
-function animateNeedle(timestamp) {
-  if (!startTime) startTime = timestamp;
-  const elapsed = timestamp - startTime;
-  const rotation = (elapsed / 3000) * 360;
-  needle.style.transform = `rotate(${rotation}deg) translate(-50%, 0)`;
-  if(active) {
-    requestAnimationFrame(animateNeedle);
-  } else {
-    needle.style.transform = `translate(-50%, 0)`;
-    startTime = null;
-  }
-}
-
-
-let alertPlaying = false;
-
-
-function resetRadar() {
-  if (!alertPlaying) {
-    clearInterval(quesitoTimer);
-    pauseScanSound();
-    alertSound.play();
-    alertPlaying = true;
-
-
-    const imgIndex = Math.floor(Math.random() * totalQuesos);
-    bigQuesito.style.backgroundImage = `url(${imgs[imgIndex]})`;
-    bigQuesito.style.display = 'block';
-    bigQuesito.style.animation = 'grow 2s forwards';
-    active = false;
-  } else {
-    alertSound.pause();
-    alertSound.currentTime = 0;
-    alertPlaying = false;
-
-
-    bigQuesito.style.display = 'none';
-    radar.style.display = 'block';
-    active = true;
-
-
-    quesitoTimer = setInterval(spawnQuesito, 3000);
-    requestAnimationFrame(animateNeedle);
-  }
-}
-
-
-// Toggle scan sound on sound button click
-soundToggle.addEventListener('click', () => {
-  if (scanSoundPlaying) {
-    pauseScanSound();
-  } else if (active && !alertPlaying) {
-    playScanSound();
-  }
-});
-
-
-startBtn.addEventListener('click', startScanning);
-resetBtn.addEventListener('click', resetRadar);
-</script>
+      alert("Simulación completada. En un entorno real, nunca introduzcas credenciales sin verificar la web.");
+      window.location.href = "https://www.youtube.com";
+    });
+  </script>
 </body>
 </html>
